@@ -1,5 +1,7 @@
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import React, { useEffect, useState } from "react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import * as ed from "@noble/ed25519";
 import { sha512 } from "@noble/hashes/sha512";
 import { getParams } from "./helpers";
@@ -24,7 +26,7 @@ const App = () => {
       setElusiv(e);
       setKeyPair(kp);
       setConnection(conn);
-      console.log("All set!");
+	  toast.info("Instantiated Elusiv");
       setIsLoading(false);
     };
 
@@ -63,28 +65,28 @@ const App = () => {
 
   useEffect(() => {
     const getBalance = async () => {
+	  toast.info("Fetching private balance...");
       const privateBalance = await elusiv.getLatestPrivateBalance("LAMPORTS");
-      console.log("Current private balance: ", privateBalance);
+	  toast.success("Fetched private balance!");
       setBalance(privateBalance);
       setFetching(false);
     };
 
     if (elusiv !== null) {
-      getBalance().then(() => console.log("Balance updated"));
+      getBalance().then(() => toast.success("Balance updated"));
     }
   }, [elusiv]);
 
   const topupHandler = async (e) => {
     e.preventDefault();
-    console.log("Initiating topup...");
+    toast.info("Initiating topup...");
     const sig = await topup(
       elusiv,
       keyPair,
       LAMPORTS_PER_SOL,
       "LAMPORTS"
     );
-    console.log(`Topup complete with sig ${sig.signature}`);
-	alert("Topup complete!");
+    toast.success(`Topup complete with sig ${sig.signature}`);
   };
 
   const sendHandler = async (e) => {
@@ -92,15 +94,14 @@ const App = () => {
 	setIsSending(true);
     if (balance > BigInt(0)) {
 		// Send half a SOL
-		console.log("Sending...");
+		toast.info("Sending...");
 		const sig = await send(
 			elusiv,
 			recipient,
 			0.5 * LAMPORTS_PER_SOL,
 			"LAMPORTS"
 		);
-		console.log(`Send complete with sig ${sig.signature}`);
-		alert("Send complete!");
+		toast.success(`Send complete with sig ${sig.signature}`);
 	}
   };
 
@@ -120,6 +121,7 @@ const App = () => {
       <button onClick={(e) => sendHandler(e)} disabled={isLoading || balance <= 0 || isSending}>
         Send
       </button>
+	  <ToastContainer autoClose={5000} />
     </>
   );
 };
